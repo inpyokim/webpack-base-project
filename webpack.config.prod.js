@@ -7,35 +7,46 @@ const {
     CleanWebpackPlugin
 } = require("clean-webpack-plugin");
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const TerserJSPlugin = require('terser-webpack-plugin');
+const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 
 module.exports = {
     entry: {
         index: "./src/index.js",
-        second:"./src/second.js"
+        second: "./src/second.js"
     },
     output: {
         filename: "bundle/[name].[hash].js",
         path: path.resolve(__dirname + "/build")
     },
     optimization: {
-      splitChunks: {
-        cacheGroups: {
-          commons: {
-            test: /[\\/]node_modules[\\/]/,
-            name: 'vendors',
-            chunks: 'all'
-          },
-              // Merge all the CSS into one file
-            styles: {
-              name: 'styles',
-              test: /common\.css$/,
-              chunks: 'all',
-              minChunks: 1,
-              reuseExistingChunk: true,
-              enforce: true,
+        minimizer: [new TerserJSPlugin({
+                terserOptions: {
+                    compress: {
+                        drop_console: true,
+                    },
+                }
+            }),
+              new OptimizeCSSAssetsPlugin({})
+             ],
+        splitChunks: {
+            cacheGroups: {
+                commons: {
+                    test: /[\\/]node_modules[\\/]/,
+                    name: 'vendors',
+                    chunks: 'all'
+                },
+                // Merge all the CSS into one file
+                styles: {
+                    name: 'styles',
+                    test: /common\.css$/,
+                    chunks: 'all',
+                    minChunks: 1,
+                    reuseExistingChunk: true,
+                    enforce: true,
+                }
             }
         }
-      }
     },
     mode: "production",
     module: {
@@ -47,10 +58,12 @@ module.exports = {
       },
             {
                 test: /\.css$/,
-                use: [{loader:MiniCssExtractPlugin.loader,
-                       options:{
-                           publicPath:"/"
-                       }}, 'css-loader']
+                use: [{
+                    loader: MiniCssExtractPlugin.loader,
+                    options: {
+                        publicPath: "/"
+                    }
+                }, 'css-loader']
       },
             {
                 test: /\.html$/,
@@ -91,9 +104,9 @@ module.exports = {
             filename: "bundle/[name].[hash].css"
         }),
     new CopyWebpackPlugin([
-        {
-            from: './src/library/external_sample.js',
-            to: 'library/external_sample.js'
+            {
+                from: './src/library/external_sample.js',
+                to: 'library/external_sample.js'
         }
     ])
   ]

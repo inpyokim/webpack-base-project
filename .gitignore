@@ -5,3 +5,4 @@
 .brackets.json
 /node_modules/
 /build/
+.env
